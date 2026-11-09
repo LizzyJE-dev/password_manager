@@ -1,8 +1,6 @@
 package com.lizzy.password_manager.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,34 +11,18 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "credentials")
 public class Credential {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long credentialId;
 
+    @Lob
+    @Column(nullable = false, columnDefinition = "MEDIUMBLOB")
+    private byte[] encryptedData;
 
-    //Ex: Google, GitHub, etc
-    @Column(nullable = false)
-    @NotBlank(message = "Service name can't be empty.")
-    private String serviceName;
-
-
-    //Ex: Username, email, etc
-    private String username;
-
-    @Column(nullable = false)
-    @Size(max = 500)
-    @NotBlank(message = "Password can't be empty.")
-    private String encryptedPassword;
-
-
-    private String websiteUrl;
-
-
-    private String notes;
-
-    //Ex: Social Media, Development, etc
-    private String category;
+    @Column(nullable = false, columnDefinition = "BINARY(12)")
+    private byte[] nonce;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -48,6 +30,9 @@ public class Credential {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "vault_id" , nullable = false)
+    private Vault vault;
 
     @PrePersist
     public void prePersist() {
